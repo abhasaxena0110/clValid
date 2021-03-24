@@ -56,7 +56,7 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
   for (nc in nClust) {
     switch(clMethod,
            kmeans = {
-             initial <- tapply(mat, list(rep(cutree(clusterObjInit,nc),ncol(mat)),col(mat)),
+             initial <- tapply(mat, list(rep(stats::cutree(clusterObjInit,nc),ncol(mat)),col(mat)),
                                function(x) mean(x, na.rm=TRUE))
              if(length(dup <- which(duplicated(initial)))>0) {
                for(dupi in dup) 
@@ -71,11 +71,11 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
              cluster <- clusterObj[[ind]]$clustering
            },
            model = {
-             clusterObj[[ind]] <- mclust::Mclust(mat,nc, ...)
+             clusterObj[[ind]] <- Mclust(mat,nc, ...)
              cluster <- clusterObj[[ind]]$classification
            },
            som = {
-             clusterObj[[ind]] <- kohonen::som(mat, grid=somgrid(1,nc), ...)
+             clusterObj[[ind]] <- som(mat, grid=somgrid(1,nc), ...)
              cluster <- clusterObj[[ind]]$unit.classif
            },
            pam = {
@@ -92,7 +92,7 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
 
            },
            ## otherwise - hierarchical, diana, agnes
-           {cluster <- cutree(clusterObj,nc)})
+           {cluster <- stats::cutree(clusterObj,nc)})
 
     if(length(table(cluster))!=nc) {
       warning(paste(clMethod, "unable to find",nc,"clusters, returning NA for these validation measures"))
@@ -136,7 +136,7 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
 
         switch(clMethod,
                kmeans = {
-                 initialDel <- tapply(matDel, list(rep(cutree(clusterObjInitDel,nc),
+                 initialDel <- tapply(matDel, list(rep(stats::cutree(clusterObjInitDel,nc),
                                                        ncol(matDel)), col(matDel)),
                                       function(x) mean(x, na.rm=TRUE))
                  if(length(dup <- which(duplicated(initialDel)))>0) {
@@ -152,10 +152,10 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
                  clusterDel <- hfdel$clustering
                },
                model = {
-                 clusterDel <- mclust::Mclust(matDel,nc, ...)$classification
+                 clusterDel <- Mclust(matDel,nc, ...)$classification
                },
                som = {
-                 hsdel <- try(kohonen::som(matDel, grid=somgrid(1,nc), ...))
+                 hsdel <- try(som(matDel, grid=somgrid(1,nc), ...))
                  clusterDel <- hsdel$unit.classif
                },
                pam = {
@@ -168,7 +168,7 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
                  clusterDel <- sota(matDel,nc-1)$clust
                },
                ## otherwise - hierarchical, diana, agnes
-               {clusterDel <- cutree(clusterObjDel,nc)})
+               {clusterDel <- stats::cutree(clusterObjDel,nc)})
 
         if("stability"%in%validation) {
           stabmeas <- stability(mat, Dist, del, cluster, clusterDel)
@@ -230,4 +230,3 @@ vClusters <- function(mat,clMethod,nClust,nclustMax, validation,
   
   list(clusterObj=clusterObj, measures=measures)
 }
-
